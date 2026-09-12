@@ -22,5 +22,51 @@ services:
       timeout: 5s
       retries: 5
 
+  # Base de données dédiée à Etherpad. Séparée de la base applicative "postgres"
+  # ci-dessus : Etherpad gère ses propres tables internes, on ne les mélange pas
+  # avec le schéma métier (utilisateur, document, permission...).
+  postgres_etherpad:
+    image: postgres:16
+    container_name: projet_docs-postgres_etherpad
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${ETHERPAD_DB_NAME}
+      POSTGRES_USER: ${ETHERPAD_DB_USER}
+      POSTGRES_PASSWORD: ${ETHERPAD_DB_PASSWORD}
+    volumes:
+      - pgdata_etherpad:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${ETHERPAD_DB_USER} -d ${ETHERPAD_DB_NAME}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  etherpad:
+    image: etherpad/etherpad:latest
+    container_name: projet_docs_etherpad
+    restart: unless-stopped
+    depends_on:
+      postgres_etherpad:
+        condition: service_healthy
+    environment:
+      NODE_ENV: production
+      ADMIN_PASSWORD: ${ETHERPAD_ADMIN_PASSWORD}
+      DB_TYPE: postgres
+      DB_HOST: postgres_etherpad
+      DB_PORT: 5432
+      DB_NAME: ${ETHERPAD_DB_NAME}
+      DB_USER: ${ETHERPAD_DB_USER}
+      DB_PASS: ${ETHERPAD_DB_PASSWORD}
+      DEFAULT_PAD_TEXT: " "
+      TRUST_PROXY: "true"
+      AUTHENTICATION_METHOD: apikey
+    ports:
+      - "9001:9001"
+    volumes:
+      - etherpad_var:/opt/etherpad-lite/var
+      - ./etherpad-apikey/APIKEY.txt:/opt/etherpad-lite/APIKEY.txt
+
 volumes:
   pgdata:
+  pgdata_etherpad:
+  etherpad_var:

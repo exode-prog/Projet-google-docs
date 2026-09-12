@@ -1,6 +1,7 @@
 const express = require("express");
 const pool = require("../config/db");
 const { requireAuth } = require("../middlewares/auth");
+const etherpad = require("../config/etherpad");
 
 const router = express.Router();
 
@@ -8,8 +9,8 @@ const router = express.Router();
 router.use(requireAuth);
 
 // POST /api/documents
-// Crée un document et donne automatiquement le rôle "owner" à son créateur
-// (matérialise l'association A_ACCES du MCD, portée par la table permission).
+// Crée un document, donne le rôle "owner" à son créateur, et crée le pad
+// Etherpad correspondant (padID = id du document, pour rester simple et unique).
 router.post("/", async (req, res) => {
   const { title } = req.body;
   if (!title) {
@@ -30,6 +31,11 @@ router.post("/", async (req, res) => {
       "INSERT INTO permission (document_id, user_id, role) VALUES ($1, $2, 'owner')",
       [document.id, req.user.id]
     );
+
+    // Le pad est créé après la validation en base : si Etherpad est indisponible,
+    // on préfère annuler la création plutôt que d'avoir un document sans éditeur.
+    await etherpad.createPad(document.id);
+    await client.query("UPDATE document SET etherpad_id = $1 WHERE id = $1", [document.id]);
 
     await client.query("COMMIT");
     res.status(201).json({ status: "ok", document });
@@ -72,7 +78,8 @@ async function getRole(documentId, userId) {
 }
 
 // GET /api/documents/:id
-// Accessible à owner, editor et viewer.
+// Accessible à owner, editor et viewer. Renvoie aussi l'URL du pad Etherpad,
+// adaptée au rôle : lecture seule pour un viewer, édition pour owner/editor.
 router.get("/:id", async (req, res) => {
   const role = await getRole(req.params.id, req.user.id);
   if (!role) {
@@ -84,7 +91,20 @@ router.get("/:id", async (req, res) => {
     if (result.rows.length === 0) {
       return res.status(404).json({ status: "error", message: "Document introuvable" });
     }
-    res.json({ status: "ok", document: result.rows[0], role });
+    const document = result.rows[0];
+    const base = process.env.ETHERPAD_BASE_URL || "http://localhost:9001";
+
+    let padUrl = null;
+    if (document.etherpad_id) {
+      if (role === "viewer") {
+        const readOnlyID = await etherpad.getReadOnlyID(document.etherpad_id);
+        padUrl = `${base}/p/${readOnlyID}`;
+      } else {
+        padUrl = `${base}/p/${document.etherpad_id}`;
+      }
+    }
+
+    res.json({ status: "ok", document, role, pad_url: padUrl });
   } catch (err) {
     console.error("Erreur lecture document :", err.message);
     res.status(500).json({ status: "error", message: "Erreur lors de la récupération du document" });
@@ -117,7 +137,8 @@ router.patch("/:id", async (req, res) => {
 });
 
 // DELETE /api/documents/:id
-// Suppression réservée au owner uniquement.
+// Suppression réservée au owner uniquement. Le pad Etherpad est supprimé
+// en meilleur effort : si Etherpad échoue, on supprime quand même le document.
 router.delete("/:id", async (req, res) => {
   const role = await getRole(req.params.id, req.user.id);
   if (role !== "owner") {
@@ -125,6 +146,17 @@ router.delete("/:id", async (req, res) => {
   }
 
   try {
+    const docResult = await pool.query("SELECT etherpad_id FROM document WHERE id = $1", [req.params.id]);
+    const etherpadId = docResult.rows[0]?.etherpad_id;
+
+    if (etherpadId) {
+      try {
+        await etherpad.deletePad(etherpadId);
+      } catch (padErr) {
+        console.error("Avertissement : suppression du pad Etherpad échouée :", padErr.message);
+      }
+    }
+
     await pool.query("DELETE FROM document WHERE id = $1", [req.params.id]);
     res.json({ status: "ok", message: "Document supprimé" });
   } catch (err) {
