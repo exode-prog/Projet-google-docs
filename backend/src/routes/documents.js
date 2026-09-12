@@ -2,6 +2,7 @@ const express = require("express");
 const pool = require("../config/db");
 const { requireAuth } = require("../middlewares/auth");
 const etherpad = require("../config/etherpad");
+const { getRole } = require("../utils/permissions");
 
 const router = express.Router();
 
@@ -67,15 +68,6 @@ router.get("/", async (req, res) => {
     res.status(500).json({ status: "error", message: "Erreur lors de la récupération des documents" });
   }
 });
-
-// Petite fonction utilitaire : vérifie le rôle de l'utilisateur sur un document donné.
-async function getRole(documentId, userId) {
-  const result = await pool.query(
-    "SELECT role FROM permission WHERE document_id = $1 AND user_id = $2",
-    [documentId, userId]
-  );
-  return result.rows[0]?.role || null;
-}
 
 // GET /api/documents/:id
 // Accessible à owner, editor et viewer. Renvoie aussi l'URL du pad Etherpad,

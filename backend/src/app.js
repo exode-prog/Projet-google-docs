@@ -3,6 +3,7 @@ const cors = require("cors");
 const healthRoutes = require("./routes/health");
 const authRoutes = require("./routes/auth");
 const documentsRoutes = require("./routes/documents");
+const filesRoutes = require("./routes/files");
 
 const app = express();
 
@@ -14,6 +15,7 @@ app.use(express.json());
 app.use("/api", healthRoutes);
 app.use("/api/auth", authRoutes);
 app.use("/api/documents", documentsRoutes);
+app.use("/api/documents/:id/files", filesRoutes);
 
 // Route racine simple, utile pour vérifier rapidement que le serveur répond.
 app.get("/", (req, res) => {

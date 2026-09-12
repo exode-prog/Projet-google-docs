@@ -66,7 +66,31 @@ services:
       - etherpad_var:/opt/etherpad-lite/var
       - ./etherpad-apikey/APIKEY.txt:/opt/etherpad-lite/APIKEY.txt
 
+  # Instance MinIO dédiée à ce projet, isolée des autres instances MinIO déjà
+  # présentes sur cette machine (conteneur "minio" et service systemd), qui
+  # visent toutes les deux les ports 9000/9001 par défaut. On prend 9010/9011
+  # pour ne rentrer en conflit avec rien de ce qui tourne déjà.
+  minio:
+    image: minio/minio:latest
+    container_name: projet_docs_minio
+    restart: unless-stopped
+    command: server /data --console-address ":9011"
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
+    ports:
+      - "9010:9000"   # API S3
+      - "9011:9011"   # console web
+    volumes:
+      - minio_data:/data
+    healthcheck:
+      test: ["CMD", "mc", "ready", "local"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
 volumes:
   pgdata:
   pgdata_etherpad:
   etherpad_var:
+  minio_data:
