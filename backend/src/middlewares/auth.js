@@ -14,7 +14,7 @@ function requireAuth(req, res, next) {
 
   try {
     const payload = jwt.verify(token, process.env.JWT_SECRET);
-    req.user = { id: payload.sub, email: payload.email };
+    req.user = { id: payload.sub, email: payload.email, name: payload.name, isAdmin: payload.isAdmin };
     next();
   } catch (err) {
     return res.status(401).json({ status: "error", message: "Token invalide ou expiré" });

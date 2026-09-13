@@ -16,8 +16,28 @@ const upload = multer({
 
 router.use(requireAuth);
 
-// POST /api/documents/:id/files
-// Upload d'un fichier attaché au document. Réservé à owner et editor (pas viewer).
+/**
+ * @openapi
+ * /documents/{id}/files:
+ *   post:
+ *     tags: [Fichiers]
+ *     summary: Uploader un fichier (owner et editor uniquement)
+ *     parameters:
+ *       - name: id
+ *         in: path
+ *         required: true
+ *         schema: { type: string, format: uuid }
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         multipart/form-data:
+ *           schema:
+ *             type: object
+ *             properties: { file: { type: string, format: binary } }
+ *     responses:
+ *       201: { description: Fichier stocké dans MinIO }
+ *       403: { description: Droit insuffisant }
+ */
 router.post("/", upload.single("file"), async (req, res) => {
   const documentId = req.params.id;
   const role = await getRole(documentId, req.user.id);
@@ -52,8 +72,20 @@ router.post("/", upload.single("file"), async (req, res) => {
   }
 });
 
-// GET /api/documents/:id/files
-// Liste les fichiers d'un document. Accessible à owner, editor et viewer.
+/**
+ * @openapi
+ * /documents/{id}/files:
+ *   get:
+ *     tags: [Fichiers]
+ *     summary: Lister les fichiers d'un document
+ *     parameters:
+ *       - name: id
+ *         in: path
+ *         required: true
+ *         schema: { type: string, format: uuid }
+ *     responses:
+ *       200: { description: Liste des fichiers }
+ */
 router.get("/", async (req, res) => {
   const documentId = req.params.id;
   const role = await getRole(documentId, req.user.id);
@@ -73,9 +105,24 @@ router.get("/", async (req, res) => {
   }
 });
 
-// GET /api/documents/:id/files/:fileId/download
-// Génère une URL de téléchargement temporaire (valable 5 minutes) plutôt que de
-// rendre le bucket public : c'est MinIO qui sert le fichier, pas notre backend.
+/**
+ * @openapi
+ * /documents/{id}/files/{fileId}/download:
+ *   get:
+ *     tags: [Fichiers]
+ *     summary: Obtenir une URL de téléchargement temporaire (5 minutes)
+ *     parameters:
+ *       - name: id
+ *         in: path
+ *         required: true
+ *         schema: { type: string, format: uuid }
+ *       - name: fileId
+ *         in: path
+ *         required: true
+ *         schema: { type: string, format: uuid }
+ *     responses:
+ *       200: { description: URL signée MinIO }
+ */
 router.get("/:fileId/download", async (req, res) => {
   const documentId = req.params.id;
   const role = await getRole(documentId, req.user.id);
@@ -101,8 +148,24 @@ router.get("/:fileId/download", async (req, res) => {
   }
 });
 
-// DELETE /api/documents/:id/files/:fileId
-// Suppression réservée à owner et editor.
+/**
+ * @openapi
+ * /documents/{id}/files/{fileId}:
+ *   delete:
+ *     tags: [Fichiers]
+ *     summary: Supprimer un fichier (owner et editor uniquement)
+ *     parameters:
+ *       - name: id
+ *         in: path
+ *         required: true
+ *         schema: { type: string, format: uuid }
+ *       - name: fileId
+ *         in: path
+ *         required: true
+ *         schema: { type: string, format: uuid }
+ *     responses:
+ *       200: { description: Fichier supprimé }
+ */
 router.delete("/:fileId", async (req, res) => {
   const documentId = req.params.id;
   const role = await getRole(documentId, req.user.id);

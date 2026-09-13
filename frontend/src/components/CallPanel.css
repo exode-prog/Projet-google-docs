@@ -1,0 +1,81 @@
+.call-panel {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  padding: 16px;
+}
+
+.call-start {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  text-align: center;
+  color: var(--text-muted);
+  font-size: 13.5px;
+}
+
+.call-grid {
+  flex: 1;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  grid-auto-rows: minmax(110px, 1fr);
+  gap: 8px;
+  overflow-y: auto;
+  align-content: start;
+  place-items: stretch;
+}
+
+.call-tile {
+  position: relative;
+  background: #0d1b26;
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+.call-tile video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.call-tile-label {
+  position: absolute;
+  bottom: 6px;
+  left: 8px;
+  background: rgba(0, 0, 0, 0.55);
+  color: var(--white);
+  font-size: 11.5px;
+  padding: 2px 8px;
+  border-radius: 4px;
+}
+
+.call-controls {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  padding-top: 14px;
+}
+
+.call-control-btn {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  border: 1px solid var(--border);
+  background: var(--white);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--blue-dark);
+}
+.call-control-btn:hover {
+  background: var(--blue-light);
+}
+.call-control-hangup {
+  background: var(--danger);
+  border-color: var(--danger);
+  color: var(--white);
+}
+.call-control-hangup:hover {
+  background: #a53326;
+}

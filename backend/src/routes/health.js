@@ -3,9 +3,17 @@ const pool = require("../config/db");
 
 const router = express.Router();
 
-// GET /api/health
-// Vérifie que l'API répond ET que la connexion à PostgreSQL fonctionne réellement
-// (utile pour diagnostiquer rapidement un problème de configuration ou de réseau).
+/**
+ * @openapi
+ * /health:
+ *   get:
+ *     tags: [Santé]
+ *     summary: Vérifie que l'API et la connexion PostgreSQL fonctionnent
+ *     security: []
+ *     responses:
+ *       200: { description: Tout fonctionne }
+ *       503: { description: Base de données injoignable }
+ */
 router.get("/health", async (req, res) => {
   try {
     const result = await pool.query("SELECT NOW() AS server_time");

@@ -5,11 +5,31 @@ const pool = require("../config/db");
 
 const router = express.Router();
 
-// POST /api/auth/register
-// Crée un compte utilisateur. Le mot de passe n'est jamais stocké en clair :
-// il est haché avec bcrypt avant l'insertion en base (colonne password_hash).
+/**
+ * @openapi
+ * /auth/register:
+ *   post:
+ *     tags: [Auth]
+ *     summary: Créer un compte
+ *     security: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [email, password]
+ *             properties:
+ *               email: { type: string, format: email }
+ *               password: { type: string, minLength: 8 }
+ *               name: { type: string, nullable: true, description: "Optionnel, l'email sert d'affichage sinon" }
+ *     responses:
+ *       201: { description: Compte créé }
+ *       400: { description: Champs manquants ou mot de passe trop court }
+ *       409: { description: Email déjà utilisé }
+ */
 router.post("/register", async (req, res) => {
-  const { email, password } = req.body;
+  const { email, password, name } = req.body;
 
   if (!email || !password) {
     return res.status(400).json({ status: "error", message: "Email et mot de passe requis" });
@@ -27,8 +47,8 @@ router.post("/register", async (req, res) => {
     const passwordHash = await bcrypt.hash(password, 10);
 
     const result = await pool.query(
-      "INSERT INTO utilisateur (email, password_hash) VALUES ($1, $2) RETURNING id, email, created_at",
-      [email, passwordHash]
+      "INSERT INTO utilisateur (email, password_hash, name) VALUES ($1, $2, $3) RETURNING id, email, name, created_at",
+      [email, passwordHash, name || null]
     );
 
     res.status(201).json({ status: "ok", user: result.rows[0] });
@@ -38,8 +58,28 @@ router.post("/register", async (req, res) => {
   }
 });
 
-// POST /api/auth/login
-// Vérifie les identifiants et renvoie un token JWT valable 24h.
+/**
+ * @openapi
+ * /auth/login:
+ *   post:
+ *     tags: [Auth]
+ *     summary: Se connecter
+ *     security: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [email, password]
+ *             properties:
+ *               email: { type: string, format: email }
+ *               password: { type: string }
+ *     responses:
+ *       200: { description: "Connexion réussie, renvoie un token JWT" }
+ *       401: { description: Identifiants invalides }
+ *       403: { description: Compte désactivé }
+ */
 router.post("/login", async (req, res) => {
   const { email, password } = req.body;
 
@@ -48,7 +88,7 @@ router.post("/login", async (req, res) => {
   }
 
   try {
-    const result = await pool.query("SELECT id, email, password_hash FROM utilisateur WHERE email = $1", [email]);
+    const result = await pool.query("SELECT id, email, name, is_admin, is_active, password_hash FROM utilisateur WHERE email = $1", [email]);
     if (result.rows.length === 0) {
       return res.status(401).json({ status: "error", message: "Identifiants invalides" });
     }
@@ -59,9 +99,17 @@ router.post("/login", async (req, res) => {
       return res.status(401).json({ status: "error", message: "Identifiants invalides" });
     }
 
-    const token = jwt.sign({ sub: user.id, email: user.email }, process.env.JWT_SECRET, { expiresIn: "24h" });
+    if (!user.is_active) {
+      return res.status(403).json({ status: "error", message: "Ce compte a été désactivé" });
+    }
 
-    res.json({ status: "ok", token, user: { id: user.id, email: user.email } });
+    const token = jwt.sign(
+      { sub: user.id, email: user.email, name: user.name, isAdmin: user.is_admin },
+      process.env.JWT_SECRET,
+      { expiresIn: "24h" }
+    );
+
+    res.json({ status: "ok", token, user: { id: user.id, email: user.email, name: user.name, isAdmin: user.is_admin } });
   } catch (err) {
     console.error("Erreur login :", err.message);
     res.status(500).json({ status: "error", message: "Erreur lors de la connexion" });

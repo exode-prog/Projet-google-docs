@@ -1,0 +1,146 @@
+:root {
+  --blue-dark: #1f4e79;
+  --blue-mid: #2e75b6;
+  --blue-light: #eaf2fb;
+  --blue-pale: #f5f9fd;
+  --border: #dbe4ee;
+  --text: #1a2330;
+  --text-muted: #5b6b7c;
+  --white: #ffffff;
+  --danger: #c0392b;
+  --success: #1e7e4f;
+  --radius: 8px;
+  --shadow: 0 1px 3px rgba(31, 78, 121, 0.08);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html, body, #root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  font-family: "Segoe UI", system-ui, -apple-system, Roboto, sans-serif;
+  background: var(--blue-pale);
+  color: var(--text);
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3, h4 {
+  color: var(--blue-dark);
+  margin: 0 0 12px;
+  font-weight: 600;
+}
+
+a {
+  color: var(--blue-mid);
+  text-decoration: none;
+}
+a:hover {
+  text-decoration: underline;
+}
+
+button {
+  font-family: inherit;
+  cursor: pointer;
+}
+
+input, textarea, select {
+  font-family: inherit;
+  font-size: 14px;
+}
+
+/* Boutons */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 18px;
+  border-radius: var(--radius);
+  border: 1px solid transparent;
+  font-size: 14px;
+  font-weight: 500;
+  transition: background-color 0.15s ease, border-color 0.15s ease;
+}
+.btn-primary {
+  background: var(--blue-dark);
+  color: var(--white);
+}
+.btn-primary:hover {
+  background: #173f63;
+}
+.btn-secondary {
+  background: var(--white);
+  color: var(--blue-dark);
+  border-color: var(--border);
+}
+.btn-secondary:hover {
+  background: var(--blue-light);
+}
+.btn-danger {
+  background: var(--white);
+  color: var(--danger);
+  border-color: var(--border);
+}
+.btn-danger:hover {
+  background: #fdf0ee;
+}
+.btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+/* Champs de formulaire */
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 16px;
+}
+.field label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+.field input, .field textarea {
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  outline: none;
+  background: var(--white);
+}
+.field input:focus, .field textarea:focus {
+  border-color: var(--blue-mid);
+  box-shadow: 0 0 0 3px rgba(46, 117, 182, 0.15);
+}
+
+/* Cartes */
+.card {
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+}
+
+/* Messages d'erreur */
+.form-error {
+  background: #fdf0ee;
+  border: 1px solid #f2c6bd;
+  color: var(--danger);
+  padding: 10px 14px;
+  border-radius: var(--radius);
+  font-size: 13.5px;
+  margin-bottom: 16px;
+}
+
+/* Écran de chargement centré */
+.centered-loader {
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-muted);
+}

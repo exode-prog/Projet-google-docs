@@ -1,0 +1,70 @@
+.navbar {
+  height: 60px;
+  background: var(--blue-dark);
+  color: var(--white);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 24px;
+  flex-shrink: 0;
+}
+
+.navbar-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--white);
+  font-weight: 600;
+  font-size: 16px;
+}
+.navbar-brand:hover {
+  text-decoration: none;
+  opacity: 0.9;
+}
+
+.navbar-logo {
+  height: 28px;
+  width: auto;
+}
+
+.navbar-user {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.navbar-email {
+  font-size: 13.5px;
+  color: var(--blue-light);
+}
+
+.navbar .btn-secondary {
+  background: transparent;
+  color: var(--white);
+  border-color: rgba(255, 255, 255, 0.35);
+}
+.navbar .btn-secondary:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+@media (max-width: 640px) {
+  .navbar {
+    padding: 0 12px;
+    gap: 8px;
+  }
+  .navbar-brand span {
+    display: none;
+  }
+  .navbar-user {
+    gap: 8px;
+  }
+  .navbar-email {
+    display: none;
+  }
+  .navbar .btn-secondary {
+    padding: 8px;
+  }
+  .navbar-btn-label {
+    display: none;
+  }
+}

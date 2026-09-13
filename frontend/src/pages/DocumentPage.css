@@ -1,0 +1,122 @@
+.document-page {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.document-topbar {
+  height: 52px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 0 16px;
+  background: var(--white);
+  border-bottom: 1px solid var(--border);
+}
+
+.document-topbar-title {
+  font-weight: 600;
+  font-size: 15px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
+}
+
+.document-body {
+  flex: 1;
+  display: flex;
+  min-height: 0;
+}
+
+.document-editor {
+  flex: 1;
+  min-width: 0;
+  background: var(--white);
+}
+
+.document-iframe {
+  width: 100%;
+  height: 100%;
+  border: none;
+}
+
+.document-sidebar {
+  width: 340px;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  border-radius: 0;
+  border-top: none;
+  border-bottom: none;
+  border-right: none;
+}
+
+.document-tabs {
+  display: flex;
+  border-bottom: 1px solid var(--border);
+  flex-shrink: 0;
+}
+
+.document-tab {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 10px 4px;
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid transparent;
+  color: var(--text-muted);
+  font-size: 11.5px;
+}
+.document-tab:hover {
+  background: var(--blue-pale);
+}
+.document-tab.active {
+  color: var(--blue-dark);
+  border-bottom-color: var(--blue-dark);
+  font-weight: 600;
+}
+
+.document-tab-content {
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.document-page-error {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  color: var(--text-muted);
+}
+
+@media (max-width: 860px) {
+  .document-body {
+    flex-direction: column;
+  }
+  .document-editor {
+    min-height: 260px;
+  }
+  .document-sidebar {
+    width: 100%;
+    height: 320px;
+    border-top: 1px solid var(--border);
+  }
+}
+
+@media (max-width: 420px) {
+  .document-tab {
+    font-size: 10.5px;
+    padding: 8px 2px;
+  }
+  .document-sidebar {
+    height: 280px;
+  }
+}

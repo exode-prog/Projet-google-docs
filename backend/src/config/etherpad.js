@@ -38,4 +38,47 @@ async function deletePad(padID) {
   return callEtherpad("deletePad", { padID });
 }
 
-module.exports = { createPad, getReadOnlyID, deletePad };
+// Crée (ou récupère) un groupe Etherpad correspondant à notre document.
+// C'est ce groupe qui permet ensuite de créer des sessions restreintes :
+// un pad "simple" (createPad) reste accessible publiquement par quiconque
+// connaît son URL, alors qu'un pad de groupe n'est accessible qu'avec une
+// session valide, créée uniquement par notre backend après vérification
+// des droits (table permission).
+async function createGroupIfNotExistsFor(documentId) {
+  const result = await callEtherpad("createGroupIfNotExistsFor", { groupMapper: documentId });
+  return result.groupID;
+}
+
+// Crée le pad à l'intérieur de ce groupe. L'identifiant réel du pad devient
+// "<groupID>$<padName>" — c'est cette valeur composée qu'on stocke dans
+// document.etherpad_id. La réponse de l'API renvoie un objet { padID, deletionToken },
+// pas directement la chaîne : il faut bien extraire le champ padID.
+async function createGroupPad(groupID, padName) {
+  const result = await callEtherpad("createGroupPad", { groupID, padName });
+  return result.padID;
+}
+
+// Mappe un utilisateur de notre application à un auteur Etherpad. Idempotent :
+// appeler plusieurs fois avec le même authorMapper renvoie toujours le même auteur.
+async function createAuthorIfNotExistsFor(userId, name) {
+  const result = await callEtherpad("createAuthorIfNotExistsFor", { authorMapper: userId, name });
+  return result.authorID;
+}
+
+// Crée une session temporaire liant un auteur à un groupe, expirant à validUntil
+// (timestamp Unix en secondes). C'est l'identifiant de cette session, posé comme
+// cookie côté navigateur, qui autorise réellement l'accès au pad.
+async function createSession(groupID, authorID, validUntilSeconds) {
+  const result = await callEtherpad("createSession", { groupID, authorID, validUntil: validUntilSeconds });
+  return result.sessionID;
+}
+
+module.exports = {
+  createPad,
+  getReadOnlyID,
+  deletePad,
+  createGroupIfNotExistsFor,
+  createGroupPad,
+  createAuthorIfNotExistsFor,
+  createSession,
+};
