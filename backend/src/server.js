@@ -20,9 +20,14 @@ const options = {
 const server = https.createServer(options, app);
 
 // Socket.io s'attache au même serveur HTTPS que l'API REST (un seul port à gérer).
+// Même liste d'origines autorisées que l'API REST (voir app.js), pour rester
+// cohérent plutôt que de laisser Socket.io ouvert à "*".
 // Documentation officielle : https://socket.io/docs/v4/server-initialization/
+const allowedOrigins = (process.env.FRONTEND_ORIGIN || "https://localhost:5173")
+  .split(",")
+  .map((o) => o.trim());
 const io = new Server(server, {
-  cors: { origin: "*" }, // à restreindre à l'origine réelle du frontend en production
+  cors: { origin: allowedOrigins },
 });
 attachChat(io);
 

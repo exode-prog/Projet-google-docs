@@ -1,5 +1,6 @@
 const express = require("express");
 const cors = require("cors");
+const helmet = require("helmet");
 const swaggerUi = require("swagger-ui-express");
 const swaggerSpec = require("./swagger");
 const healthRoutes = require("./routes/health");
@@ -11,7 +12,34 @@ const adminRoutes = require("./routes/admin");
 
 const app = express();
 
-app.use(cors());
+// helmet règle en une fois plusieurs en-têtes de sécurité HTTP standards :
+// HSTS, X-Content-Type-Options, retrait de X-Powered-By, protection anti-
+// clickjacking, etc. Documentation officielle : https://helmetjs.github.io/
+// contentSecurityPolicy est désactivé ici : par défaut trop strict pour une
+// API pure (pas de pages HTML servies), il bloquerait par exemple Swagger UI.
+app.use(helmet({ contentSecurityPolicy: false }));
+
+// CORS restreint à une liste d'origines autorisées, plutôt qu'ouvert à "*"
+// (n'importe quel site web pourrait sinon appeler notre API directement
+// depuis le navigateur d'un utilisateur connecté). Plusieurs origines
+// peuvent être listées séparées par des virgules dans FRONTEND_ORIGIN (utile
+// pour accepter à la fois localhost et l'IP réelle du serveur, par exemple).
+const allowedOrigins = (process.env.FRONTEND_ORIGIN || "https://localhost:5173")
+  .split(",")
+  .map((o) => o.trim());
+
+app.use(
+  cors({
+    origin(origin, callback) {
+      if (!origin || allowedOrigins.includes(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error("Origine non autorisée par CORS"));
+      }
+    },
+  })
+);
+
 app.use(express.json());
 
 // Documentation interactive de l'API (Swagger UI), générée depuis openapi.json.
