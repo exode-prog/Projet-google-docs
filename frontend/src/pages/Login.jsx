@@ -14,8 +14,8 @@ export default function Login() {
     e.preventDefault();
     setError("");
     try {
-      await login(email, password);
-      navigate("/");
+      const result = await login(email, password);
+      navigate(result.user?.isAdmin ? "/admin" : "/");
     } catch (err) {
       setError(err.message);
     }

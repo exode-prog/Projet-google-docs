@@ -74,7 +74,10 @@ export default function CallPanel({ documentId }) {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
       streamRef.current = stream;
-      if (localVideoRef.current) localVideoRef.current.srcObject = stream;
+      // Ne PAS tenter d'attacher le flux ici : à ce stade, inCall vaut encore
+      // false, donc l'élément <video> de la preview locale n'existe pas
+      // encore dans le DOM (voir le useEffect ci-dessous, qui s'en charge
+      // une fois que l'élément apparaît réellement).
 
       const peer = new Peer(undefined, { host: PEER_HOST, port: PEER_PORT, path: "/peer", secure: true });
       peerRef.current = peer;
@@ -122,6 +125,16 @@ export default function CallPanel({ documentId }) {
   }
 
   useEffect(() => () => leaveCall(), []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // Attache le flux local à l'élément <video> une fois qu'il existe vraiment
+  // dans le DOM (c'est-à-dire une fois inCall passé à true). C'est le
+  // correctif du bug : avant, on tentait l'attachement trop tôt, quand
+  // l'élément n'était pas encore monté, et rien ne réessayait ensuite.
+  useEffect(() => {
+    if (inCall && localVideoRef.current && streamRef.current) {
+      localVideoRef.current.srcObject = streamRef.current;
+    }
+  }, [inCall]);
 
   return (
     <div className="call-panel">
