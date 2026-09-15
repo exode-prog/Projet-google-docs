@@ -68,30 +68,30 @@ Backend Node.js/Express (port 3443, HTTPS)
 projet-google-docs/
 ├── backend/
 │   ├── src/
-│   │   ├── server.js          → point d'entrée (HTTPS, Socket.io, PeerServer)
-│   │   ├── app.js              → configuration Express (middlewares, routes, Swagger)
-│   │   ├── swagger.js          → génère la doc API depuis les commentaires @openapi
-│   │   ├── config/             → connexions PostgreSQL, Etherpad, MinIO
-│   │   ├── middlewares/        → authentification JWT, contrôle admin
-│   │   ├── routes/             → auth, documents, fichiers, messages, admin, santé
-│   │   ├── sockets/            → logique Socket.io (chat, appel)
-│   │   └── utils/               → vérification des droits partagée
-│   ├── db/migrations/          → schéma SQL, exécuté dans l'ordre numéroté
-│   └── tests/                  → collection Postman, plans de test JMeter
+│   │   ├── server.js             point d'entrée (HTTPS, Socket.io, PeerServer)
+│   │   ├── app.js                configuration Express (middlewares, routes, Swagger)
+│   │   ├── swagger.js            génère la doc API depuis les commentaires @openapi
+│   │   ├── config/               connexions PostgreSQL, Etherpad, MinIO
+│   │   ├── middlewares/          authentification JWT, contrôle admin
+│   │   ├── routes/               auth, documents, fichiers, messages, admin, santé
+│   │   ├── sockets/              logique Socket.io (chat, appel)
+│   │   └── utils/                vérification des droits partagée
+│   ├── db/migrations/            schéma SQL, exécuté dans l'ordre numéroté
+│   └── tests/                    collection Postman, plans de test JMeter
 │
 ├── frontend/
 │   └── src/
-│       ├── api/client.js       → tous les appels à l'API REST
-│       ├── context/            → authentification, connexion Socket.io globale
-│       ├── components/         → Navbar, panneaux (chat/fichiers/appel/partage), routes protégées
-│       └── pages/               → connexion, inscription, tableau de bord, document, administration
+│       ├── api/client.js         tous les appels à l'API REST
+│       ├── context/              authentification, connexion Socket.io globale
+│       ├── components/           Navbar, panneaux (chat/fichiers/appel/partage), routes protégées
+│       └── pages/                connexion, inscription, tableau de bord, document, administration
 │
-├── docker/                     → (si utilisé) configuration Docker
-├── docker-compose.yml          → PostgreSQL, Etherpad (+ proxy nginx), MinIO
-├── etherpad-proxy.conf         → configuration du reverse proxy HTTPS devant Etherpad
+├── docker/                       (si utilisé) configuration Docker
+├── docker-compose.yml            PostgreSQL, Etherpad (+ proxy nginx), MinIO
+├── etherpad-proxy.conf           configuration du reverse proxy HTTPS devant Etherpad
 └── docs/
-    ├── GUIDE.md                 → documentation technique détaillée (installation, dépannage...)
-    └── Cahier_des_charges_projet_collaboratif.docx
+    ├── GUIDE.md                  documentation technique détaillée (installation, dépannage...)
+    └── Rapport.docx
 ```
 
 ---
